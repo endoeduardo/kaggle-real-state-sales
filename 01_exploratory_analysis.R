@@ -110,10 +110,10 @@ aux <- real_state_sales_treated %>%
 
 ggplot(aux, aes(x = list_year, y = percentage, color = residential_type)) +
   geom_line() + 
-  # geom_point(aes(shape = residential_type), size = 2) +
-  geom_text(aes(x = list_year, label = paste0(percentage, '%'))) +
-  theme_bw()
-  # theme(axis.text.y = element_text(size=6))
+  geom_point(aes(shape = residential_type), size = 2) +
+  # geom_text(aes(x = list_year, label = paste0(percentage, '%'))) +
+  theme_bw() 
+  # theme(axis.text.y = element_text(size=4))
 
 ggsave('charts/eda/residential_type_proportions_through_years.png', 
        height = 10,
@@ -137,7 +137,3 @@ ggsave('charts/eda/residential_type_proportions_through_years.png',
 
 
 
-
-
-df_nan <- real_state_sales %>% 
-  filter(property_type == 'Nan')
