@@ -17,3 +17,8 @@ To assess the impact of residential properties, the dataset is split into two pe
 
 The charts depicting the proportion of residential types highlight how NaN values skew the data. While NaN values appear as the second most prevalent category, the majority of them were recorded before the residential category was created. The line plot indicates that the proportion of residential types does not vary significantly over time.
 
+![Total Number of real estate sales for each town](number_of_sales_per_town.png)
+The "town" category has a disproportionate number of observations that skew the data. This could potentially impact a future predictive model trained with this dataset. Ways to address or mitigate this problem need to be explored.
+
+![Total Number of real estate sales over the years](total_number_of_sales.png)
+The chart above indicates that the total number of real estate sales peaked in 2004 and hit a low point in 2008, during the American financial crisis. An area worth investigating is whether the prices exhibited a similar pattern.

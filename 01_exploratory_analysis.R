@@ -2,15 +2,14 @@
 library(tidyverse)
 library(readr)
 
+#Cleaning the environment
+rm(list = ls())
+
 #setting working directory
 setwd("C:/Users/Eduardo Endo/Documents/r_scripts/git_projects/kaggle-real-state-sales")
 
-real_state_sales <- read_csv("dataset/real-state-sales.csv") %>% 
+real_estate_sales <- read_csv("dataset/real-estate-sales.csv") %>% 
   janitor::clean_names()
-
-
-real_state_sales %>% 
-  count(town)
 
 #-------------------------------------------------------------------------------
 # EXPLORING THE PROPERTY TYPE COLUMN ----
@@ -18,7 +17,7 @@ real_state_sales %>%
 
 #This part shows that the property type categorization has changed along the years
 #an maybe the property_type is level 1 and the residential_type is level 2
-df_plot <- real_state_sales %>% 
+df_plot <- real_estate_sales %>% 
   # filter(property_type == 'Commercial') %>% 
   mutate(list_year = as.factor(list_year)) %>% 
   group_by(list_year, property_type) %>% 
@@ -38,7 +37,7 @@ ggsave('charts/eda/property_type_changes_through_the_years.png',
        units = 'cm')
 
 #Treating the residential type column
-real_state_sales_treated <- real_state_sales %>%
+real_estate_sales_treated <- real_estate_sales %>%
         #Changing residential_type
   mutate(residential_type = ifelse(property_type %in% c('Condo',
                                                         'Single Family',
@@ -57,7 +56,7 @@ real_state_sales_treated <- real_state_sales %>%
                                 property_type)
          )
 
-ggplot(real_state_sales_treated %>% 
+ggplot(real_estate_sales_treated %>% 
          mutate(list_year = as.factor(list_year)) %>% 
          group_by(list_year, property_type) %>% 
          summarise(total = n()) %>% 
@@ -76,7 +75,7 @@ ggsave('charts/eda/property_type_changes_through_the_years_after_treatment.png',
 #-------------------------------------------------------------------------------
 # EXPLORING THE RESIDENTIAL TYPE COLUMN ----
 #-------------------------------------------------------------------------------
-df_plot <- real_state_sales_treated %>%
+df_plot <- real_estate_sales_treated %>%
   group_by(residential_type) %>% 
   summarise(count = n()) %>% 
   ungroup() %>% 
@@ -89,7 +88,7 @@ df_plot <- real_state_sales_treated %>%
 
 ggplot(df_plot, aes(x = count, y = residential_type)) +
   geom_col() + 
-  geom_text(aes(x = count, label = percentage), hjust = -0.5) +
+  geom_text(aes(x = count, label = percentage), hjust = -0.2) +
   scale_x_continuous(expand = c(0.2, 1.5)) +
   theme_bw() +
   theme(axis.text.y = element_text(size=12))
@@ -100,7 +99,7 @@ ggsave('charts/eda/residential_types.png',
        units = 'cm')
 
 #Treating the residential type column
-aux <- real_state_sales_treated %>% 
+aux <- real_estate_sales_treated %>% 
   count(list_year, residential_type) %>% 
   group_by(list_year) %>% 
   add_tally(n) %>% 
@@ -119,6 +118,83 @@ ggsave('charts/eda/residential_type_proportions_through_years.png',
        height = 10,
        width = 10,
        units = 'cm')
+
+#-------------------------------------------------------------------------------
+# EXPLORING THE TOWN COLUMN ----
+#-------------------------------------------------------------------------------
+town_count <- real_estate_sales_treated %>% 
+  group_by(list_year) %>%
+  count(town) %>% 
+  arrange(desc(n)) %>% 
+  add_tally(n) %>% 
+  mutate(percentage = n/nn*100,
+         percentage = round(percentage, 1)) %>% 
+  ungroup()
+
+#Top3 cities with most observations
+ggplot(town_count %>% 
+         filter(town %in% c('Bridgeport', 'Waterbury', 'Stamford')), 
+       aes(x=list_year, y=n, color=town)) +
+  geom_line() +
+  geom_point(aes(shape=town)) +
+  theme_bw()
+ggsave('charts/eda/number_of_sales_top3_cities.png')
+
+#Real estate sales over the) years
+ggplot(real_estate_sales_treated %>% count(list_year), 
+       aes(x=list_year, y=n)) +
+  geom_line() +
+  theme_bw()
+ggsave('charts/eda/total_number_of_sales.png')
+
+ggplot(real_estate_sales_treated %>% 
+         count(town) %>% 
+         add_tally(n) %>% 
+         mutate(percentage = n/nn*100,
+                percentage = round(percentage, 1)),
+       aes(x = n, y = fct_reorder(town, n, max))) +
+  geom_col() +
+  geom_text(aes(x = n, label = paste0(percentage, '%')), hjust = -0.5, size = 3) +
+  labs(y = 'town') +
+  theme(axis.text.y = element_text(size=4)) 
+ggsave('charts/eda/number_of_sales_per_town.png')
+#-------------------------------------------------------------------------------
+# TREATING THE OUTLIERS ----
+#-------------------------------------------------------------------------------
+
+#removing the outliers 
+q <- quantile(real_estate_sales$assessed_value, c(0.25, 0.75))
+
+threshold <- 1.5
+iqr <- IQR(real_estate_sales$assessed_value)
+lower_bound <- q[1] - threshold * iqr
+upper_bound <- q[2] + threshold * iqr
+
+filtered_real_estate_sales <- real_estate_sales_treated %>% 
+  filter(assessed_value >= lower_bound, assessed_value <= upper_bound)
+
+aux <- filtered_real_estate_sales %>% 
+  count(town)
+
+ggplot(filtered_real_estate_sales %>% count(list_year), 
+       aes(x=list_year, y=n)) +
+  geom_line() +
+  theme_bw()
+
+ggplot(filtered_real_estate_sales, aes(x=assessed_value, y=as.factor(list_year))) +
+  geom_boxplot(outlier.shape = NA)
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
