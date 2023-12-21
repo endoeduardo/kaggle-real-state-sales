@@ -186,23 +186,54 @@ ggplot(filtered_real_estate_sales, aes(x=assessed_value, y=as.factor(list_year))
 
 
 
+ggplot(filtered_real_estate_sales, aes(x = assessed_value)) +
+  geom_histogram(bins = 300)
+
+iterations <- 1000
+sample_size <- 200
+
+histogram_of_means <- function(iterations, sample_size){
+  mean_list <- list()
+  
+  for (i in 1:iterations){
+    n_sample <- sample(filtered_real_estate_sales$assessed_value, sample_size)
+    sample_mean <- mean(n_sample)
+    mean_list <- c(mean_list, sample_mean)
+  }
+  
+  df_mean <- tibble(means = mean_list) %>% 
+    mutate(means = as.numeric(means))
+  
+  
+  ggplot(df_mean, aes(x = means)) +
+    geom_histogram(bins=100)
+  
+}
+
+# 
+# histogram_of_means(100, 1000)
+# ggsave('charts/eda/means_histogram_100_iterations.png')
+# histogram_of_means(1000, 1000)
+# ggsave('charts/eda/means_histogram_1000_iterations.png')
+# histogram_of_means(10000, 1000)
+# ggsave('charts/eda/means_histogram_10000_iterations.png')
+# histogram_of_means(50000, 1000)
+# ggsave('charts/eda/means_histogram_50000_iterations.png')
+# histogram_of_means(70000, 1000)
+# ggsave('charts/eda/means_histogram_70000_iterations.png')
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+histogram_of_means(1000, 200)
+ggsave('charts/eda/means_histogram_200_sample_size.png')
+histogram_of_means(1000, 500)
+ggsave('charts/eda/means_histogram_500_sample_size.png')
+histogram_of_means(1000, 1000)
+ggsave('charts/eda/means_histogram_1000_sample_size.png')
+histogram_of_means(1000, 15000)
+ggsave('charts/eda/means_histogram_15000_sample_size.png')
+histogram_of_means(1000, 40000)
+ggsave('charts/eda/means_histogram_40000_sample_size.png')
 
 
 
