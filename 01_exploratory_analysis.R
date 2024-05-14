@@ -12,7 +12,7 @@ real_estate_sales <- read_csv("dataset/real-estate-sales.csv") %>%
   janitor::clean_names()
 
 #-------------------------------------------------------------------------------
-# EXPLORING THE PROPERTY TYPE COLUMN ----
+# EXPLORING THE PROPERTY TYPE COLUMN ---
 #-------------------------------------------------------------------------------
 
 #This part shows that the property type categorization has changed along the years
@@ -158,6 +158,7 @@ ggplot(real_estate_sales_treated %>%
   labs(y = 'town') +
   theme(axis.text.y = element_text(size=4)) 
 ggsave('charts/eda/number_of_sales_per_town.png')
+
 #-------------------------------------------------------------------------------
 # TREATING THE OUTLIERS ----
 #-------------------------------------------------------------------------------
@@ -185,10 +186,50 @@ ggplot(filtered_real_estate_sales, aes(x=assessed_value, y=as.factor(list_year))
   geom_boxplot(outlier.shape = NA)
 
 
-
+#### checking the resulted distributions ---------------------------------------
 ggplot(filtered_real_estate_sales, aes(x = assessed_value)) +
   geom_histogram(bins = 300)
 
+
+#Assessed values
+ggplot(filtered_real_estate_sales %>% 
+         filter(assessed_value > 0), aes(x = assessed_value)) +
+  geom_histogram(bins = 300) +
+  theme_bw()
+ggsave('charts/eda/assessed_value_distribution.png')
+
+#Sales ratio
+ggplot(filtered_real_estate_sales, aes(x = sales_ratio)) + 
+  geom_histogram(bins = 100) +
+  xlim(0, 1)
+
+#Sales value
+ggplot(filtered_real_estate_sales, aes(x = sale_amount)) +
+  # geom_histogram(bins = 100, alpha = 0.3) +
+  geom_density() +
+  xlim(0, 1e6)
+
+
+#Calculating the z-score
+mean_assessed_value <- mean(amostra, na.rm = TRUE)
+sd_assessed_values <- sd(amostra, na.rm = TRUE)
+z_score <- (amostra - mean_assessed_value)/sd_assessed_values
+
+amostra <- sample(filtered_real_estate_sales$assessed_value, size=500)
+qqnorm(z_score)
+abline(a=0, b=1, col='grey')
+
+#QQ chart for normal sample
+norm_samp <- rnorm(500)
+qqnorm(norm_samp)
+abline(a=0, b=1, col='grey')
+
+poisson <- data.frame(poisson=rpois(10000, 10), exponencial=rexp(10000, 10))
+
+ggplot(poisson, aes(x = exponencial)) +
+  geom_histogram(bins = 25)
+
+# Testing the TLC theorem ------------------------------------------------------
 iterations <- 1000
 sample_size <- 200
 
